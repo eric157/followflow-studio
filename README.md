@@ -2,15 +2,16 @@
 
 ![FollowFlow mark](assets/followflow-mark.svg)
 
-FollowFlow Studio is a Python desktop toolkit for building a follower cleanup workflow from start to finish:
+FollowFlow Studio is a Python desktop app + CLI that helps you:
 
-1. Collect `followers` and `following` from either a logged-in browser session or an Instagram export ZIP.
-2. Compare the two lists and generate `non_mutuals.json`.
-3. Review profiles one by one in a managed browser session.
-4. Keep progress, logs, and resume state between sessions.
-5. Update `following.json` after a review session based on the profiles you marked as unfollowed.
+- Collect `followers` and `following` from either:
+  - a **logged-in managed browser session** (Playwright), or
+  - an **Instagram export ZIP**
+- Compare the two lists and generate `non_mutuals.json`
+- Review profiles one by one in a managed browser session, with resume state + logs
+- Optionally update `following.json` after marking profiles as unfollowed during review
 
-The project includes both a CLI and a desktop launcher, so it works well for script users and for people who just want a clickable app.
+It’s designed for a “clickable” Windows workflow, but everything also works from the CLI.
 
 ## Highlights
 
@@ -25,7 +26,7 @@ The project includes both a CLI and a desktop launcher, so it works well for scr
 - Resume-safe review sessions with:
   - `review_state.json`
   - `review_log.jsonl`
-- Windows-friendly desktop launcher built with Tkinter
+- Windows-friendly desktop launcher (CustomTkinter)
 - PowerShell build script for a packaged `.exe`
 
 ## Project Layout
@@ -69,6 +70,17 @@ followflow-studio/
 ```
 
 Generated files under `data/`, `build/`, and `dist/` are ignored by Git.
+
+## Security & privacy (read this first)
+
+- **No credentials should be committed**: This repository does not contain (and should not contain) Instagram passwords, API keys, cookies, or tokens.
+- **FollowFlow does not ask you to paste cookies/tokens**: Login is done interactively in the opened browser window.
+- **Your login session lives in the browser profile directory**: by default `data/runtime/browser-profile/` (or whatever you pick in the app). That directory can include cookies/local storage and effectively represents a logged-in session.
+  - This directory is kept **out of git** by `.gitignore`.
+  - Treat it like a password: don’t share it, don’t upload it, don’t commit it.
+- **Processed JSON files can contain usernames** (followers/following/non-mutuals). Those are written under `data/processed/` by default and are also ignored by git.
+
+If you ever suspect you committed a secret: rotate it immediately and rewrite git history before pushing.
 
 ## Requirements
 
@@ -121,7 +133,7 @@ The launcher starts review sessions without needing terminal input. The local re
 
 If Instagram opens on the login page, sign in directly in the managed browser window. FollowFlow waits there until the session is authenticated, then resumes automatically. If Instagram asks for a code, challenge, `Save login info`, or notification prompt, finish those in the browser and let FollowFlow continue from the same run.
 
-The scrape flow now starts from Instagram's login route so the browser is always in the right place to finish sign-in first. If a logged-out profile or follower-list click later throws a `Log in / Sign up` prompt, FollowFlow returns to the login flow, waits for you to finish it in the browser, then retries the same scrape step automatically.
+The scrape flow starts from Instagram's login route so the browser is always in the right place to finish sign-in first. If a logged-out profile or follower-list click later throws a `Log in / Sign up` prompt, FollowFlow returns to the login flow, waits for you to finish it in the browser, then retries the same scrape step automatically.
 
 During the login handoff, FollowFlow also tries to clear the common Instagram blockers automatically, including:
 
