@@ -18,11 +18,12 @@ It’s designed for a “clickable” Windows workflow, but everything also work
 - Two data-source paths:
   - scrape from a logged-in browser session
   - read from an Instagram export ZIP
-- Polished local review control panel with:
+- Polished local review control panel (served on `127.0.0.1`) with:
   - profile preview
   - progress tracking
   - state badges
   - action buttons
+  - **opens as a second tab in the same managed Chromium window** (not your default browser), unless you opt into `--system-browser-ui`
 - Resume-safe review sessions with:
   - `review_state.json`
   - `review_log.jsonl`
@@ -82,6 +83,35 @@ Generated files under `data/`, `build/`, and `dist/` are ignored by Git.
 
 If you ever suspect you committed a secret: rotate it immediately and rewrite git history before pushing.
 
+## FAQ
+
+### Why is `dist/` not included in the Git repository?
+
+`dist/` is the **PyInstaller output**: hundreds of MB of binaries, Playwright driver bits, and bundled DLLs. Keeping it in git would:
+
+- **Bloat** clones and GitHub storage
+- **Go stale** quickly (every rebuild changes hashes)
+- **Fight** Windows file locks (running `FollowFlow.exe` blocks deletes/checkouts)
+
+The source repo is the **truth**; anyone can reproduce `dist/` with `.\scripts\build_windows_exe.ps1`. Release builds belong in **GitHub Releases** (see below), not in the main tree.
+
+### Can the review panel live inside the Windows app instead of a browser?
+
+**Not with the current stack without a larger rewrite.** The launcher is CustomTkinter; the review UI is HTML/JS served by a tiny local HTTP server (`review_ui.py`). Embedding that cleanly usually means adding something like a **WebView2** / **CEF** / **pywebview** host inside the desktop app and wiring it to the same `http://127.0.0.1:<port>` URL. That is doable, but it is a **separate feature** (new dependency, packaging changes, and testing on Windows).
+
+**What we do today:** the review page opens in the **same managed Chromium window** Playwright already uses for Instagram, as a **second tab**. You switch tabs between the profile and the control panel—no second browser brand/window unless you pass `--system-browser-ui`.
+
+### Can we ship this as GitHub Releases?
+
+Yes. Typical flow:
+
+1. Tag a version (example): `git tag v0.2.1 && git push origin v0.2.1`
+2. On GitHub: **Releases → Draft a new release**, attach the **artifact users should download**:
+   - Zip the folder `dist\FollowFlow\` (exe + `_internal\`) so paths stay correct, e.g. `FollowFlow-Windows-v0.2.1.zip`
+3. Describe what changed and any install notes (Playwright runtime is bundled in the PyInstaller output from the build script).
+
+Optional next step: add a **GitHub Actions** workflow to build the zip on every tag (requires caching Playwright browsers and PyInstaller on the runner).
+
 ## Requirements
 
 - Python 3.11+
@@ -129,7 +159,7 @@ What the launcher can do:
 - run the full prepare-to-review flow in one click
 - show live logs in a built-in console panel
 
-The launcher starts review sessions without needing terminal input. The local review control panel still opens automatically in your default browser.
+The launcher starts review sessions without needing terminal input. The local review control panel opens **in the same managed Chromium window** as Instagram (second tab) so you are not juggling two different browsers.
 
 If Instagram opens on the login page, sign in directly in the managed browser window. FollowFlow waits there until the session is authenticated, then resumes automatically. If Instagram asks for a code, challenge, `Save login info`, or notification prompt, finish those in the browser and let FollowFlow continue from the same run.
 
@@ -320,6 +350,7 @@ Options:
 - `--reset` ignore the saved review state and start from `0`
 - `--no-ui` disable the local review control panel
 - `--no-terminal` disable terminal commands
+- `--system-browser-ui` open the review panel in your **default system browser** instead of a tab in the managed Chromium window
 
 ## Legacy Wrapper Scripts
 

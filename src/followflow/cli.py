@@ -178,6 +178,11 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Disable terminal commands and rely on the local review control panel only.",
     )
+    review_parser.add_argument(
+        "--system-browser-ui",
+        action="store_true",
+        help="Open the review control panel in your default system browser instead of a tab in the managed Chromium window.",
+    )
 
     return parser
 
@@ -245,6 +250,7 @@ def main(argv: list[str] | None = None) -> int:
             reset=args.reset,
             use_ui=not args.no_ui,
             allow_terminal_input=not args.no_terminal,
+            open_review_ui_in_system_browser=args.system_browser_ui,
         )
         return 0
 

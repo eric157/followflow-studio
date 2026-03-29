@@ -369,6 +369,8 @@ def run_review(
     allow_terminal_input: bool = True,
     login_username: str | None = None,
     login_password: str | None = None,
+    *,
+    open_review_ui_in_system_browser: bool = False,
 ) -> None:
     if not use_ui and not allow_terminal_input:
         raise SystemExit("Review requires either terminal input or the local control panel.")
@@ -407,7 +409,8 @@ def run_review(
     print(f"Managed browser profile: {profile_dir}")
     if ui_server is not None:
         ui_server.start()
-        ui_server.open_browser()
+        if open_review_ui_in_system_browser:
+            ui_server.open_browser()
         if ui_server.url:
             print(f"Local review UI: {ui_server.url}")
 
@@ -419,6 +422,17 @@ def run_review(
         )
 
         try:
+            if ui_server is not None and ui_server.url and not open_review_ui_in_system_browser:
+                ui_page = context.new_page()
+                try:
+                    ui_page.goto(ui_server.url, wait_until="domcontentloaded", timeout=30000)
+                    print("Review control panel opened in the managed browser (second tab). Switch tabs between Instagram and the panel.")
+                except Exception as exc:
+                    print(
+                        f"Could not open the review panel inside the managed browser ({exc}). "
+                        f"Open this URL in any browser: {ui_server.url}"
+                    )
+
             ui_state.update(state="login", message="Checking Instagram login state.", last_action="Checking Instagram login state.")
             wait_for_login(
                 page,
