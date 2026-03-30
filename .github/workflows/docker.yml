@@ -33,15 +33,13 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=raw,value=latest,enable={{is_default_branch}}
 
-      # ── QEMU (multi-arch support, optional but good practice) ─────────────────
+      # ── QEMU (multi-arch support) ─────────────────────────────────────────
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
       # ── Buildx ──────────────────────────────────────────────────────────────
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-        with:
-          install: true
 
       # ── Login to ghcr.io ─────────────────────────────────────────────────────
       - name: Log in to GitHub Container Registry
@@ -64,5 +62,5 @@ jobs:
           platforms: linux/amd64
 
       # ── Summary ──────────────────────────────────────────────────────────────
-      - name: Print image digest
-        run: echo "Image pushed with tags ${{ steps.meta.outputs.tags }}"
+      - name: Print image tags
+        run: echo "Pushed image with tags ${{ steps.meta.outputs.tags }}"
