@@ -579,9 +579,11 @@ class ReviewUiState:
 
 
 class ReviewUiServer:
-    def __init__(self, state: ReviewUiState, command_sink) -> None:
+    def __init__(self, state: ReviewUiState, command_sink, host: str = "127.0.0.1", port: int = 0) -> None:
         self._state = state
         self._command_sink = command_sink
+        self._host = host
+        self._port = port
         self._server: ThreadingHTTPServer | None = None
         self._thread: threading.Thread | None = None
         self.url: str | None = None
@@ -642,8 +644,9 @@ class ReviewUiServer:
             def log_message(self, format: str, *args) -> None:
                 return
 
-        self._server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
-        self.url = f"http://127.0.0.1:{self._server.server_port}"
+        self._server = ThreadingHTTPServer((self._host, self._port), Handler)
+        assert self._server is not None
+        self.url = f"http://{self._host}:{self._server.server_port}" if self._host != "0.0.0.0" else f"http://localhost:{self._server.server_port}"
         self._thread = threading.Thread(target=self._server.serve_forever, daemon=True)
         self._thread.start()
 

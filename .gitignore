@@ -11,7 +11,11 @@ venv/
 build/
 dist/
 dist_build*/
-*.spec
+
+# Note: FollowFlow.spec is intentionally kept (tracked by git).
+# Only ignore auto-generated specs from unknown tools:
+# *.spec
+
 *.egg-info/
 *.log
 *.tmp
@@ -26,3 +30,6 @@ data/processed/*
 !data/processed/.gitkeep
 data/runtime/*
 !data/runtime/.gitkeep
+
+# Local release ZIPs (produced by build_windows_exe.ps1 into dist/)
+FollowFlow-Windows-*.zip

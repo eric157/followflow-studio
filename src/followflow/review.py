@@ -400,7 +400,10 @@ def run_review(
         message="Launching the managed Instagram browser session.",
         last_action="Launching the managed Instagram browser session.",
     )
-    ui_server = ReviewUiServer(ui_state, command_reader) if use_ui else None
+    import os
+    ui_host = os.environ.get("FOLLOWFLOW_UI_HOST", "127.0.0.1")
+    ui_port = int(os.environ.get("FOLLOWFLOW_UI_PORT", "0"))
+    ui_server = ReviewUiServer(ui_state, command_reader, host=ui_host, port=ui_port) if use_ui else None
 
     print(f"Loaded {len(targets)} profiles from {input_path}")
     print(f"Starting at index {index}")

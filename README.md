@@ -1,20 +1,53 @@
 # FollowFlow Studio
 
-Personal project for batch-reviewing Instagram followers/following and managing bulk unfollows.
+> Personal tool for batch-reviewing Instagram followers/following and managing bulk unfollows.
 
-## Quick Start
+[![GitHub Release](https://img.shields.io/github/v/release/eric157/followflow-studio?label=release)](https://github.com/eric157/followflow-studio/releases/latest)
+[![Docker Image](https://img.shields.io/badge/ghcr.io-followflow--studio-blue?logo=docker)](https://ghcr.io/eric157/followflow-studio)
+[![Python](https://img.shields.io/badge/python-%3E%3D3.11-blue?logo=python)](https://www.python.org/)
+
+---
+
+## 📦 Download (Windows)
+
+Grab the latest no-install Windows build from the [**Releases page**](https://github.com/eric157/followflow-studio/releases/latest):
+
+1. Download `FollowFlow-Windows-vX.Y.Z.zip`
+2. Extract anywhere
+3. Run `FollowFlow.exe`
+
+---
+
+## 🐳 Docker
 
 ```bash
-python -m pip install -e .
-python -m playwright install chromium
+# Pull and run (CLI help)
+docker pull ghcr.io/eric157/followflow-studio:latest
+docker run --rm ghcr.io/eric157/followflow-studio:latest followflow --help
+
+# Full review session (Review UI at http://localhost:5000)
+docker compose up
+```
+
+See [README_DOCKER.md](README_DOCKER.md) for the full Docker guide.
+
+---
+
+## 🚀 Quick Start (from source)
+
+```bash
+pip install -e .
+playwright install chromium
+followflow --help
+```
+
+Or launch the desktop GUI:
+
+```bash
 python followflow_app.py
 ```
 
-Or use the CLI directly:
-
-```bash
-followflow --help
-```
+---
 
 ## Project Layout
 
@@ -30,6 +63,8 @@ src/followflow/
 └─ review_ui.py      # Local HTTP review panel
 ```
 
+---
+
 ## Data Directories
 
 ```
@@ -38,25 +73,29 @@ data/runtime/       # browser-profile/, review_state.json, review_log.jsonl (git
 data/exports/       # Instagram export ZIPs
 ```
 
+---
+
 ## Key Commands
 
 ```bash
-# Scrape from logged-in browser
-followflow prepare --source scrape --username <username>
-
-# Extract from export ZIP
+# Extract from Instagram export ZIP
 followflow prepare --source zip --zip "/path/to/export.zip"
+
+# Scrape from logged-in browser session
+followflow prepare --source scrape --username <username>
 
 # Generate non-mutuals list
 followflow compare
 
-# Start review session
+# Start interactive review session
 followflow review
 ```
 
+---
+
 ## Notes
 
-- Login session stored in `data/runtime/browser-profile/` (keeps you logged in between runs)
+- Login session stored in `data/runtime/browser-profile/` (persists between runs)
 - Browser profile and processed data are git-ignored for security
-- Review state is saved automatically to resume sessions
-- Build exe: `.\scripts\build_windows_exe.ps1`
+- Review state is saved automatically so sessions can be resumed
+- Build Windows EXE locally: `.\scripts\build_windows_exe.ps1`

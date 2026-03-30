@@ -1,0 +1,22 @@
+# docker-compose.yml – FollowFlow Studio
+# Run the review UI:  docker compose up
+# Run any CLI cmd:    docker compose run --rm followflow <command> [args]
+
+services:
+  followflow:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: followflow-studio:latest
+    restart: unless-stopped
+    volumes:
+      # Persist user data on the host; never baked into the image
+      - ./data:/app/data
+    environment:
+      FOLLOWFLOW_UI_HOST: "0.0.0.0"
+      FOLLOWFLOW_UI_PORT: "5000"
+    ports:
+      - "5000:5000"
+    stdin_open: true   # allow interactive CLI prompts
+    tty: true
+    command: ["review"]
